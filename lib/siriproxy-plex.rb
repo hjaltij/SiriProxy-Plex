@@ -102,7 +102,6 @@ class SiriProxy::Plugin::Plex < SiriProxy::Plugin
       
       if(response =~ /([0-9]+\s*|one|two|three|four|five|six|seven|eight|nine|ten)/i)
         number = $1
-        puts "Matched: #{$1}"
         break
       else
         question = "I didn't get that, please state a number"
@@ -110,7 +109,6 @@ class SiriProxy::Plugin::Plex < SiriProxy::Plugin
     end
     
     if(number.to_i == 0)
-        puts "Mapping"
         number = map_siri_numbers_to_int(number)
     end
     
@@ -143,8 +141,6 @@ class SiriProxy::Plugin::Plex < SiriProxy::Plugin
   def play_episode(show, episode_index, season_index = 1)
     
     if(show != nil)
-      puts episode_index
-      puts season_index
       episode = @plex_library.find_episode(show, season_index, episode_index)
       
       if(episode)
@@ -172,8 +168,6 @@ class SiriProxy::Plugin::Plex < SiriProxy::Plugin
   
   def play_latest_episode_of(show_title)
     show = @plex_library.find_show(show_title)
-    
-    puts show
     
     episode = @plex_library.latest_episode(show)
 
