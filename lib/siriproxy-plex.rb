@@ -35,6 +35,18 @@ class SiriProxy::Plugin::Plex < SiriProxy::Plugin
     @plex_library = PlexLibrary.new(@host, @port)
   end
 
+##
+#SKT
+##
+  listen_for /on deck/i do
+    ondeck_shows = all_ondeck()
+    say "On Deck shows are #{ondeck_shows}"
+    request_completed
+  end 
+##
+#SKT
+##
+
   listen_for /(play|playing) (the)? latest(.+) of(.+)/i do |command, misc, some, show|
     play_latest_episode_of(show)
     request_completed

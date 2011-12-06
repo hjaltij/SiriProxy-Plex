@@ -27,10 +27,27 @@ class PlexLibrary
     doc.elements.each('MediaContainer/Directory') do |ele|
       shows << PlexShow.new(ele.attribute("key").value, ele.attribute("title").value)
     end
-
     return shows
   end
+
+##
+# skt
+## 
+  def all_ondeck
+    doc = xml_doc_for_path("/library/sections/OnDeck")
+    ondeck_shows = []
+
+    doc.elements.each('MediaContainer/Directory') do |ele|
+      ondeck_shows << PlexShow.new(ele.attribute("key").value, ele.attribute("title").value)
+    end
+    return ondeck_shows
+  end
   
+    
+##
+#skt
+##
+
   def show_seasons(show)
     
     if(show.key != nil)
