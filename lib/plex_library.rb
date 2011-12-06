@@ -33,7 +33,7 @@ class PlexLibrary
   end
 
   def all_ondeck
-    doc = xml_doc_for_path("/library/sections/#{@tv_index/onDeck")
+    doc = xml_doc_for_path("/library/sections/#{@tv_index}/onDeck")
     ondeck_shows = []
 
     doc.elements.each('MediaContainer/Video') do |ele|
