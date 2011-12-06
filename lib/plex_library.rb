@@ -3,11 +3,13 @@ require 'open-uri'
 require 'plex_show'
 require 'plex_season'
 require 'plex_episode'
+require 'plex_ondeck'
 
 class PlexLibrary
-  def initialize(host, port)
+  def initialize(host, port, tv_index)
     @host = host
     @port = port
+    @tv_index = tv_index
   end
   
   def base_path
@@ -21,7 +23,7 @@ class PlexLibrary
   end
   
   def all_shows
-    doc = xml_doc_for_path("/library/sections/2/all")
+    doc = xml_doc_for_path("/library/sections/#{@tv_index}/all")
     shows = []
 
     doc.elements.each('MediaContainer/Directory') do |ele|
@@ -30,24 +32,16 @@ class PlexLibrary
     return shows
   end
 
-##
-# skt
-## 
   def all_ondeck
-    doc = xml_doc_for_path("/library/sections/OnDeck")
+    doc = xml_doc_for_path("/library/sections/#{@tv_index/onDeck")
     ondeck_shows = []
 
-    doc.elements.each('MediaContainer/Directory') do |ele|
-      ondeck_shows << PlexShow.new(ele.attribute("key").value, ele.attribute("title").value)
+    doc.elements.each('MediaContainer/Video') do |ele|
+      ondeck_shows << PlexOndeck.new(ele.attribute("key").value, ele.attribute("title").value, ele.attribute("grandparentTitle").value)
     end
     return ondeck_shows
   end
-  
     
-##
-#skt
-##
-
   def show_seasons(show)
     
     if(show.key != nil)
@@ -97,7 +91,15 @@ class PlexLibrary
       return episodes
     end
   end
-  
+
+  def find_ondeck_show(title)
+    title.gsub!(/^The\s+/, "")
+    splitted = title.split(" ").join("|")
+    shows = all_ondeck
+    show = shows.detect {|s| s.gptitle.match(/#{splitted}/i)}
+    return show
+  end
+
   def find_show(title)
     title.gsub!(/^The\s+/, "")
     splitted = title.split(" ").join("|") 

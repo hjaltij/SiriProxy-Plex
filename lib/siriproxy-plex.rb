@@ -32,21 +32,27 @@ class SiriProxy::Plugin::Plex < SiriProxy::Plugin
   def initialize(config)
     @host = config["plex_host"]
     @port = config["plex_port"]
-    @plex_library = PlexLibrary.new(@host, @port)
+    @tv_index = config["plex_tv_index"] 
+    @plex_library = PlexLibrary.new(@host, @port, @tv_index)
   end
 
-##
-#SKT
-##
   listen_for /on deck/i do
-    ondeck_shows = all_ondeck()
-    say "On Deck shows are #{ondeck_shows}"
+    ondeck_shows = @plex_library.all_ondeck()
+    say "On Deck shows are"
+    ondeck_shows.each do |singleshow|
+      say "#{singleshow.gptitle}, #{singleshow.title}"
+    end
+    response = ask "Which show would you like to watch?"
+    show = @plex_library.find_ondeck_show(response)
+    if(show != nil)
+      @plex_library.play_media(show.key)
+      say "Playing \"#{show.gptitle}\""
+    else
+      say "Sorry I couldn't find #{response}in the ondeck queue"
+    end
     request_completed
-  end 
-##
-#SKT
-##
-
+  end
+    
   listen_for /(play|playing) (the)? latest(.+) of(.+)/i do |command, misc, some, show|
     play_latest_episode_of(show)
     request_completed
