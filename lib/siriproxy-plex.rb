@@ -32,8 +32,9 @@ class SiriProxy::Plugin::Plex < SiriProxy::Plugin
   def initialize(config)
     @host = config["plex_host"]
     @port = config["plex_port"]
-    @tv_index = config["plex_tv_index"] 
-    @plex_library = PlexLibrary.new(@host, @port, @tv_index)
+    @tv_index = config["plex_tv_index"]
+    @player = config["plex_player_host"].nil? ? config["plex_host"] : config["plex_player_host"]
+    @plex_library = PlexLibrary.new(@host, @port, @tv_index, @player)
   end
 
   listen_for /on deck/i do
@@ -52,7 +53,6 @@ class SiriProxy::Plugin::Plex < SiriProxy::Plugin
     end
     request_completed
   end
-    
   listen_for /(play|playing) (the)? latest(.+) of(.+)/i do |command, misc, some, show|
     play_latest_episode_of(show)
     request_completed

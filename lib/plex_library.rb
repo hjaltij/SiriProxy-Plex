@@ -1,15 +1,17 @@
-require 'CGI'
+require 'cgi'
 require 'open-uri'
 require 'plex_show'
 require 'plex_season'
 require 'plex_episode'
 require 'plex_ondeck'
 
+
 class PlexLibrary
-  def initialize(host, port, tv_index)
-    @host = host
-    @port = port
+  def initialize(host, port, tv_index, player=nil)
+    @host     = host
+    @port     = port
     @tv_index = tv_index
+    @player   = player.nil? ? host : player
   end
   
   def base_path
@@ -24,11 +26,13 @@ class PlexLibrary
   
   def all_shows
     doc = xml_doc_for_path("/library/sections/#{@tv_index}/all")
+
     shows = []
 
     doc.elements.each('MediaContainer/Directory') do |ele|
       shows << PlexShow.new(ele.attribute("key").value, ele.attribute("title").value)
     end
+
     return shows
   end
 
@@ -40,8 +44,8 @@ class PlexLibrary
       ondeck_shows << PlexOndeck.new(ele.attribute("key").value, ele.attribute("title").value, ele.attribute("grandparentTitle").value)
     end
     return ondeck_shows
-  end
-    
+  end  
+
   def show_seasons(show)
     
     if(show.key != nil)
@@ -99,7 +103,7 @@ class PlexLibrary
     show = shows.detect {|s| s.gptitle.match(/#{splitted}/i)}
     return show
   end
-
+  
   def find_show(title)
     title.gsub!(/^The\s+/, "")
     splitted = title.split(" ").join("|") 
@@ -145,12 +149,12 @@ class PlexLibrary
   
   def play_media(key)
     url_encoded_key = CGI::escape(key)
-    uri = "http://#{@host}:#{@port}/system/players/#{@host}/application/playMedia?key=#{url_encoded_key}&path=http://#{@host}:#{@port}#{key}"
+    uri = "http://#{@host}:#{@port}/system/players/#{@player}/application/playMedia?key=#{url_encoded_key}&path=http://#{@host}:#{@port}#{key}"
     
     begin
       open(uri).read
     rescue OpenURI::HTTPError => err
-      puts "Cannot start playback on #{$host} - are you sure the Plex Player is running'"
+      puts "Cannot start playback on #{@player} - are you sure the Plex Player is running (#{err}) -> #{uri}"
     end
   end
   
