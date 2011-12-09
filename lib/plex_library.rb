@@ -7,7 +7,7 @@ require 'plex_ondeck'
 
 
 class PlexLibrary
-  def initialize(host, port, tv_index, player=nil)
+  def initialize(host, port, tv_index, player = nil)
     @host     = host
     @port     = port
     @tv_index = tv_index

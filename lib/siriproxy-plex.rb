@@ -25,10 +25,12 @@ require 'plex_library'
 
 #######
 # This is a very basic plugin for Plex but I plan on adding to it =)
-# Remember to configure the host and port for your Plex Media Server in config.yml in the SiriProxy dir
+# Remember to configure the host and port for your Plex Media Server in config.yml in the SiriProxy dir or in ~/.siriproxy/ if you
+# are using the latest version of SiriProxy
 ######
 
 class SiriProxy::Plugin::Plex < SiriProxy::Plugin
+  
   def initialize(config)
     @host = config["plex_host"]
     @port = config["plex_port"]
@@ -40,9 +42,11 @@ class SiriProxy::Plugin::Plex < SiriProxy::Plugin
   listen_for /on deck/i do
     ondeck_shows = @plex_library.all_ondeck()
     say "On Deck shows are"
+    
     ondeck_shows.each do |singleshow|
       say "#{singleshow.gptitle}, #{singleshow.title}"
     end
+    
     response = ask "Which show would you like to watch?"
     show = @plex_library.find_ondeck_show(response)
     if(show != nil)
@@ -53,6 +57,7 @@ class SiriProxy::Plugin::Plex < SiriProxy::Plugin
     end
     request_completed
   end
+  
   listen_for /(play|playing) (the)? latest(.+) of(.+)/i do |command, misc, some, show|
     play_latest_episode_of(show)
     request_completed
