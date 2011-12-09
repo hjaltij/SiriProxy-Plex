@@ -18,11 +18,11 @@ Installation
 --
 
 1. add the following, using your IP, Port and Index to your ~siriproxy/config.yml file
-   ` - name: 'Plex'
-      git: 'git://github.com/hjaltij/SiriProxy-Plex.git'
-      plex_host: '0.0.0.0' #Internal IP address of your Plex Media Server.
-      plex_port: '32400' #Most likely you won't have to change this, it runs on port 32400 by default.
-      plex_tv_index: '2' #May have to change this.  This is the path to your TV index within PMS`
+- name: 'Plex'
+	git: 'git://github.com/hjaltij/SiriProxy-Plex.git'   
+	plex_host: '0.0.0.0' #Internal IP address of your Plex Media Server.   
+	plex_port: '32400' #Most likely you won't have to change this, it runs on port 32400 by default.   
+	plex_tv_index: '2' #May have to change this.  This is the path to your TV index within PMS.      
 
 2. Run bundler from your siriproxy root directory
 	* siriproxy bundle
