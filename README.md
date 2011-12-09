@@ -9,9 +9,9 @@ Voice control for Plex.  Includes support for playing latest version of a specif
 Voice Commands
 --
 
-play "show"
-play latest episode of "show"
-on deck
++ play "show"
++ play latest episode of "show"
++ on deck
 
 
 Installation
