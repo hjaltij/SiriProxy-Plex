@@ -17,7 +17,7 @@ Voice Commands
 Installation
 --
 
-1. add the following, using your IP, Port and Index to your ~siriproxy/config.yml file
+1. add the following, using your IP, Port and Index to your ~siriproxy/config.yml file    
 	`- name: 'Plex'`
 	   ` git: 'git://github.com/hjaltij/SiriProxy-Plex.git'`    
 	   ` plex_host: '0.0.0.0' #Internal IP address of your Plex Media Server.`     
