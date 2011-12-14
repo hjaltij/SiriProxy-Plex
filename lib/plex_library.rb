@@ -4,14 +4,31 @@ require 'plex_show'
 require 'plex_season'
 require 'plex_episode'
 require 'plex_ondeck'
+TV = "com.plexapp.agents.thetvdb"
+MOVIES = "com.plexapp.agents.imdb"
 
 
 class PlexLibrary
   def initialize(host, port, tv_index, player = nil)
     @host     = host
     @port     = port
-    @tv_index = tv_index
+#    @tv_index = tv_index
     @player   = player.nil? ? host : player
+    @indexes = {}
+    @indexes["#{TV}"] = []
+    if (tv_index == "auto")
+       doc = xml_doc_for_path("/library/sections")
+       doc.elements.each('MediaContainer/Directory') do |ele|
+          num = ele.attribute("key").value
+          agent = ele.attribute("agent").value
+          if (!@indexes.include?("#{agent}"))
+             @indexes["#{agent}"] = []
+          end
+             @indexes["#{agent}"] << "#{num}"
+       end
+    else
+       @indexes["#{TV}"] << "#{tv_index}"
+    end
   end
   
   def base_path
@@ -24,27 +41,31 @@ class PlexLibrary
     doc = REXML::Document.new(xml_data)
   end
   
+# all_shows and all_ondeck should be colapsed into one method with a variable for path.
+
   def all_shows
-    doc = xml_doc_for_path("/library/sections/#{@tv_index}/all")
-
     shows = []
+    @indexes[TV].each do |tvindex|
+       doc = xml_doc_for_path("/library/sections/#{tvindex}/all")
 
-    doc.elements.each('MediaContainer/Directory') do |ele|
-      shows << PlexShow.new(ele.attribute("key").value, ele.attribute("title").value)
+       doc.elements.each('MediaContainer/Directory') do |ele|
+         shows << PlexShow.new(ele.attribute("key").value, ele.attribute("title").value)
+       end
     end
-
     return shows
   end
 
   def all_ondeck
-    doc = xml_doc_for_path("/library/sections/#{@tv_index}/onDeck")
     ondeck_shows = []
+    @indexes[TV].each do |tvindex|
+       doc = xml_doc_for_path("/library/sections/#{tvindex}/onDeck")
 
-    doc.elements.each('MediaContainer/Video') do |ele|
-      ondeck_shows << PlexOndeck.new(ele.attribute("key").value, ele.attribute("title").value, ele.attribute("grandparentTitle").value)
+       doc.elements.each('MediaContainer/Video') do |ele|
+         ondeck_shows << PlexOndeck.new(ele.attribute("key").value, ele.attribute("title").value, ele.attribute("grandparentTitle").value)
+       end
     end
     return ondeck_shows
-  end  
+  end
 
   def show_seasons(show)
     

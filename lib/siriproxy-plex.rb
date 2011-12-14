@@ -41,22 +41,25 @@ class SiriProxy::Plugin::Plex < SiriProxy::Plugin
 
   listen_for /on deck/i do
     ondeck_shows = @plex_library.all_ondeck()
-    say "On Deck shows are"
-    
-    ondeck_shows.each do |singleshow|
-      say "#{singleshow.gptitle}, #{singleshow.title}"
-    end
-    
-    response = ask "Which show would you like to watch?"
-    show = @plex_library.find_ondeck_show(response)
-    if(show != nil)
-      @plex_library.play_media(show.key)
-      say "Playing \"#{show.gptitle}\""
+    if(!ondeck_shows.empty?)
+       say "On Deck shows are:"
+       ondeck_shows.each do |singleshow|
+         say "#{singleshow.gptitle}, #{singleshow.title}"
+       end 
+       response = ask "Which show would you like to watch?"
+       show = @plex_library.find_ondeck_show(response)
+       if(show != nil)
+         @plex_library.play_media(show.key)
+         say "Playing \"#{show.gptitle}\""
+       else
+         say "Sorry I couldn't find #{response}in the ondeck queue"
+       end 
     else
-      say "Sorry I couldn't find #{response}in the ondeck queue"
-    end
+      say "Sorry I couldn't find anything in your onDeck queue"
+    end 
     request_completed
-  end
+  end 
+
   
   listen_for /(play|playing) (the)? latest(.+) of(.+)/i do |command, misc, some, show|
     play_latest_episode_of(show)
