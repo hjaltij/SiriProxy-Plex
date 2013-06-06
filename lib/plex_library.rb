@@ -9,10 +9,11 @@ MOVIES = "com.plexapp.agents.imdb"
 
 
 class PlexLibrary
-  def initialize(host, port, tv_index, player = nil)
+  def initialize(host, port, tv_index, movie_index, player = nil)
     @host     = host
     @port     = port
 #    @tv_index = tv_index
+    @movie_index = movie_index
     @player   = player.nil? ? host : player
     @indexes = {}
     @indexes["#{TV}"] = []
@@ -29,6 +30,8 @@ class PlexLibrary
     else
        @indexes["#{TV}"] << "#{tv_index}"
     end
+	@indexes["#{MOVIES}"] = []
+	@indexes["#{MOVIES}"] << "#{movie_index}"
   end
   
   def base_path
@@ -166,6 +169,45 @@ class PlexLibrary
   def latest_episode(show)
     if show == nil then return nil end
     show_episodes(show).sort.last
+  end
+  
+    def all_movies
+    movies = []
+    @indexes[MOVIES].each do |movieindex|
+       doc = xml_doc_for_path("/library/sections/#{movieindex}/all")
+
+       doc.elements.each('MediaContainer/Directory') do |ele|
+         movies << PlexShow.new(ele.attribute("key").value, ele.attribute("title").value)
+       end
+    end
+    return movies
+  end
+  
+  def find_movie(title)
+    title.gsub!(/^The\s+/, "")
+    splitted = title.split(" ").join("|") 
+    movies = all_movies    
+    movies.detect {|s| s.title.match(/#{splitted}/i)}
+  end
+
+  def all_ondeck_movies
+    ondeck_movies = []
+	@indexes[MOVIES].each do |movieindex|
+       doc = xml_doc_for_path("/library/sections/#{movieindex}/onDeck")
+
+       doc.elements.each('MediaContainer/Video') do |ele|
+         ondeck_movies << PlexOndeck.new(ele.attribute("key").value, ele.attribute("title").value, ele.attribute("grandparentTitle"))
+       end
+    end
+    return ondeck_movies
+  end
+  
+  def find_ondeck_movie(title)
+    title.gsub!(/^The\s+/, "")
+    splitted = title.split(" ").join("|")
+    movies = all_ondeck_movies
+    movies = movies.detect {|s| s.title.match(/#{splitted}/i)}
+    return movies
   end
   
   def play_media(key)

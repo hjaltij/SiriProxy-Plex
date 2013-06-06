@@ -35,11 +35,12 @@ class SiriProxy::Plugin::Plex < SiriProxy::Plugin
     @host = config["plex_host"]
     @port = config["plex_port"]
     @tv_index = config["plex_tv_index"]
+	@movie_index = config["plex_movie_index"]
     @player = config["plex_player_host"].nil? ? config["plex_host"] : config["plex_player_host"]
-    @plex_library = PlexLibrary.new(@host, @port, @tv_index, @player)
+    @plex_library = PlexLibrary.new(@host, @port, @tv_index, @movie_index, @player)
   end
 
-  listen_for /on deck/i do
+  listen_for /on deck tv shows/i do
     ondeck_shows = @plex_library.all_ondeck()
     if(!ondeck_shows.empty?)
        say "On Deck shows are:"
@@ -50,16 +51,68 @@ class SiriProxy::Plugin::Plex < SiriProxy::Plugin
        show = @plex_library.find_ondeck_show(response)
        if(show != nil)
          @plex_library.play_media(show.key)
-         say "Playing \"#{show.gptitle}\""
+         say "Playing #{show.gptitle}, #{show.title}."
        else
-         say "Sorry I couldn't find #{response}in the ondeck queue"
+         say "Sorry I couldn't find #{response} in the ondeck queue"
        end 
     else
       say "Sorry I couldn't find anything in your onDeck queue"
     end 
     request_completed
   end 
-
+  
+    listen_for /on deck movies/i do
+    ondeck_movies = @plex_library.all_ondeck_movies()
+    if(!ondeck_movies.empty?)
+       say "On Deck movies are:"
+       ondeck_movies.each do |singlemovie|
+         say "#{singlemovie.title}"
+       end 
+       response = ask "Which movie would you like to watch?"
+       movie = @plex_library.find_ondeck_movie(response)
+       if(movie != nil)
+         @plex_library.play_media(movie.key)
+         say "Playing #{movie.title}."
+       else
+         say "Sorry I couldn't find #{response} in the ondeck queue"
+       end 
+    else
+      say "Sorry I couldn't find anything in your onDeck queue"
+    end 
+    request_completed
+  end 
+  
+  listen_for /(play|playing) (the)? movie (.+)/i do |command, misc, some, next_movie|
+    movies = @plex_library.all_movies()
+	if(!movies.empty?)
+      movie = @plex_library.find_movie(next_movie)
+	  if(movie != nil)
+	    @plex_library.play_media(movie.key)
+        say "Playing #{movie.title}."
+	  else
+	    say "Sorry I couldn't find #{next_movie}."
+	  end
+	else
+	  say "Sorry I couldn't find any movies."
+	end
+	request_completed
+  end
+  
+  listen_for /(play|playing) (the)? next(.+) of (.+)/i do |command, misc, some, next_episode|
+    ondeck_shows = @plex_library.all_ondeck()
+    if(!ondeck_shows.empty?)
+       show = @plex_library.find_ondeck_show(next_episode)
+       if(show != nil)
+         @plex_library.play_media(show.key)
+         say "Playing #{show.gptitle}, #{show.title}."
+       else
+         say "Sorry I couldn't find #{next_episode} in the ondeck queue"
+       end 
+    else
+      say "Sorry I couldn't find anything in your onDeck queue"
+    end 
+    request_completed
+  end 
   
   listen_for /(play|playing) (the)? latest(.+) of(.+)/i do |command, misc, some, show|
     play_latest_episode_of(show)
@@ -91,7 +144,7 @@ class SiriProxy::Plugin::Plex < SiriProxy::Plugin
       show_title = $1
     end
     
-    show = @plex_library.find_show(show_title)    
+   show = @plex_library.find_show(show_title)    
     season_index = match_number(first_match, "season")    
     episode_index = match_number(second_match)
     
