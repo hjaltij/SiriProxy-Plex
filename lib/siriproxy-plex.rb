@@ -82,7 +82,7 @@ class SiriProxy::Plugin::Plex < SiriProxy::Plugin
     request_completed
   end 
   
-  listen_for /(play|playing) (the)? movie (.+)/i do |command, misc, some, next_movie|
+  listen_for /(play|playing) (the)? movie(.+) (.+)/i do |command, misc, some, next_movie|
     movies = @plex_library.all_movies()
 	if(!movies.empty?)
       movie = @plex_library.find_movie(next_movie)
