@@ -10,6 +10,7 @@ Voice Commands
 --
 
 + play "show"
++ play the movie "movie name"
 + play latest episode of "show"
 + play the next episode of "show"
 + on deck tv shows
