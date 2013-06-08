@@ -87,6 +87,7 @@ class SiriProxy::Plugin::Plex < SiriProxy::Plugin
 	  random_episode = @plex_library.show_episodes(show).shuffle.first
 	   if(random_episode != nil)
          @plex_library.play_media(random_episode.key)
+		 say "Playing a random episode of #{show.title}."
        else
          say "Sorry, an error occurred.  Please try again."
        end 
@@ -218,7 +219,7 @@ class SiriProxy::Plugin::Plex < SiriProxy::Plugin
       episode_index = ask_for_episode
     end
             
-    random_episode(show, episode_index, season_index)
+    play_episode(show, episode_index, season_index)
     
     request_completed      
   end
@@ -251,7 +252,7 @@ class SiriProxy::Plugin::Plex < SiriProxy::Plugin
     end
     
     if(show)
-      random_episode(show, episode_index, season_index)
+      play_episode(show, episode_index, season_index)
     else
       show_not_found
     end
@@ -318,7 +319,7 @@ class SiriProxy::Plugin::Plex < SiriProxy::Plugin
     ask_for_number("Which episode?")
   end
   
-  def random_episode(show, episode_index, season_index = 1)
+  def play_episode(show, episode_index, season_index = 1)
     
     if(show != nil)
       episode = @plex_library.find_episode(show, season_index, episode_index)
