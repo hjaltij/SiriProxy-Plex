@@ -12,7 +12,7 @@ class PlexLibrary
   def initialize(host, port, tv_index, movie_index, player = nil)
     @host     = host
     @port     = port
-#    @tv_index = tv_index
+    @tv_index = tv_index
     @movie_index = movie_index
     @player   = player.nil? ? host : player
     @indexes = {}
@@ -31,7 +31,20 @@ class PlexLibrary
        @indexes["#{TV}"] << "#{tv_index}"
     end
 	@indexes["#{MOVIES}"] = []
-	@indexes["#{MOVIES}"] << "#{movie_index}"
+	if (movie_index == "auto")
+       doc = xml_doc_for_path("/library/sections")
+       doc.elements.each('MediaContainer/Directory') do |ele|
+          num = ele.attribute("key").value
+          agent = ele.attribute("agent").value
+          if (!@indexes.include?("#{agent}"))
+             @indexes["#{agent}"] = []
+          end
+             @indexes["#{agent}"] << "#{num}"
+       end
+    else
+       @indexes["#{MOVIES}"] << "#{movie_index}"
+    end
+	
   end
   
   def base_path
@@ -170,8 +183,8 @@ class PlexLibrary
     if show == nil then return nil end
     show_episodes(show).sort.last
   end
-  
-    def all_movies
+    
+  def all_movies
     movies = []
 	@indexes[MOVIES].each do |movieindex|
        doc = xml_doc_for_path("/library/sections/#{movieindex}/all")
@@ -206,6 +219,26 @@ class PlexLibrary
     title.gsub!(/^The\s+/, "")
     splitted = title.split(" ").join("|")
     movies = all_ondeck_movies
+    movies = movies.detect {|s| s.title.match(/#{splitted}/i)}
+    return movies
+  end
+  
+    def all_unwatched_movies
+    unwatched_movies = []
+	@indexes[MOVIES].each do |movieindex|
+       doc = xml_doc_for_path("/library/sections/#{movieindex}/unwatched")
+
+       doc.elements.each('MediaContainer/Video') do |ele|
+         unwatched_movies << PlexShow.new(ele.attribute("key").value, ele.attribute("title").value)
+       end
+    end
+    return unwatched_movies
+  end
+  
+  def find_unwatched_movie(title)
+    title.gsub!(/^The\s+/, "")
+    splitted = title.split(" ").join("|")
+    movies = all_unwatched_movies
     movies = movies.detect {|s| s.title.match(/#{splitted}/i)}
     return movies
   end

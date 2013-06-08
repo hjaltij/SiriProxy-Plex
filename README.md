@@ -10,11 +10,16 @@ Voice Commands
 --
 
 + play "show"
-+ play the movie "movie name"
 + play latest episode of "show"
 + play the next episode of "show"
 + on deck tv shows
++ play a random on deck tv show
++ play a random episode of "show"
++ play the movie "movie"
 + on deck movies
++ play a random on deck movie
++ play a random unwatched movie
++ play a random movie
 + pause movie/tv/show/plex
 + resume movie/tv/show/plex
 + stop movie/tv/show/plex
@@ -29,7 +34,7 @@ Installation
 		   plex_host: '0.0.0.0' #Internal IP address of your Plex Media Server.    
 		   plex_port: '32400' #Most likely you won't have to change this, it runs on port 32400 by default.    
 		   plex_tv_index: '2' #This is the path to your TV index within PMS, set to 'auto' for autodetect.        
-           plex_movie_index: '1' #This is the path to your Movie index within PMS
+           plex_movie_index: '1' #This is the path to your Movie index within PMS, set to 'auto' for autodetect.
 
 		   
 2. Run bundler from your siriproxy root directory
