@@ -172,6 +172,23 @@ class SiriProxy::Plugin::Plex < SiriProxy::Plugin
     request_completed
   end
   
+  listen_for /(.+) (plex|tv|show|movie)/i do |command, some|
+    if command == "pause"
+      @plex_library.pause
+	  say "Pausing #{some}"
+	end
+    if command == "resume"
+	  @plex_library.resume_play
+	  say "Resuming #{some}"
+	end
+	if command == "stop"
+	  @plex_library.stop
+	  say "Stopping #{some}"
+	end	
+	
+	request_completed
+  end
+  
   def ask_for_number(question)   
     episode = nil
     

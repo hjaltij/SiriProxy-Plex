@@ -221,4 +221,34 @@ class PlexLibrary
     end
   end
   
+  def pause
+    uri = "http://#{@host}:#{@port}/system/players/#{@player}/playback/pause"
+	
+    begin
+      open(uri).read
+    rescue OpenURI::HTTPError => err
+      puts "Cannot pause playback on #{@player} - are you sure the Plex Player is running (#{err}) -> #{uri}"
+    end
+  end
+  
+  def resume_play
+    uri = "http://#{@host}:#{@port}/system/players/#{@player}/playback/play"
+
+    begin
+      open(uri).read
+    rescue OpenURI::HTTPError => err
+      puts "Cannot resume playback on #{@player} - are you sure the Plex Player is running (#{err}) -> #{uri}"
+    end
+  end
+  
+  def stop
+    uri = "http://#{@host}:#{@port}/system/players/#{@player}/playback/stop"
+	
+    begin
+      open(uri).read
+    rescue OpenURI::HTTPError => err
+      puts "Cannot stop playback on #{@player} - are you sure the Plex Player is running (#{err}) -> #{uri}"
+    end
+  end
+  
 end
