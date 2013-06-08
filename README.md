@@ -15,6 +15,9 @@ Voice Commands
 + play the next episode of "show"
 + on deck tv shows
 + on deck movies
++ pause movie/tv/show/plex
++ resume movie/tv/show/plex
++ stop movie/tv/show/plex
 
 
 Installation
