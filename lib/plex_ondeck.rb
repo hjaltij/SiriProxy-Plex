@@ -1,15 +1,16 @@
 class PlexOndeck
   
-  attr_accessor :key, :title, :gptitle
+  attr_accessor :key, :title, :gptitle, :viewOffset
   
-  def initialize(key, title, gptitle)
+  def initialize(key, title, gptitle, viewOffset)
     @key = key
     @title = title
     @gptitle = gptitle
+	@viewOffset = viewOffset
   end
   
   def to_s
-    "#{gptitle} - #{@title} - #{key}"
+    "#{viewOffset} - #{gptitle} - #{@title} - #{key}"
   end
   
 end

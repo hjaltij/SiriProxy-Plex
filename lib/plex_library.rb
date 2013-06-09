@@ -77,7 +77,7 @@ class PlexLibrary
        doc = xml_doc_for_path("/library/sections/#{tvindex}/onDeck")
 
        doc.elements.each('MediaContainer/Video') do |ele|
-         ondeck_shows << PlexOndeck.new(ele.attribute("key").value, ele.attribute("title").value, ele.attribute("grandparentTitle").value)
+         ondeck_shows << PlexOndeck.new(ele.attribute("key").value, ele.attribute("title").value, ele.attribute("grandparentTitle").value, ele.attribute("viewOffset"))
        end
     end
     return ondeck_shows
@@ -209,7 +209,7 @@ class PlexLibrary
        doc = xml_doc_for_path("/library/sections/#{movieindex}/onDeck")
 
        doc.elements.each('MediaContainer/Video') do |ele|
-         ondeck_movies << PlexOndeck.new(ele.attribute("key").value, ele.attribute("title").value, ele.attribute("grandparentTitle"))
+         ondeck_movies << PlexOndeck.new(ele.attribute("key").value, ele.attribute("title").value, ele.attribute("grandparentTitle"), ele.attribute("viewOffset"))
        end
     end
     return ondeck_movies
@@ -246,6 +246,17 @@ class PlexLibrary
   def play_media(key)
     url_encoded_key = CGI::escape(key)
     uri = "http://#{@host}:#{@port}/system/players/#{@player}/application/playMedia?key=#{url_encoded_key}&path=http://#{@host}:#{@port}#{key}"
+    
+    begin
+      open(uri).read
+    rescue OpenURI::HTTPError => err
+      puts "Cannot start playback on #{@player} - are you sure the Plex Player is running (#{err}) -> #{uri}"
+    end
+  end
+  
+  def resume_media(key, viewOffset)
+    url_encoded_key = CGI::escape(key)
+    uri = "http://#{@host}:#{@port}/system/players/#{@player}/application/playMedia?key=#{url_encoded_key}&path=http://#{@host}:#{@port}#{key}&viewOffset=#{viewOffset}"
     
     begin
       open(uri).read

@@ -41,173 +41,248 @@ class SiriProxy::Plugin::Plex < SiriProxy::Plugin
   end
 
   listen_for /on deck tv shows/i do
-    ondeck_shows = @plex_library.all_ondeck()
-    if(!ondeck_shows.empty?)
-      say "On Deck shows are:"
-      ondeck_shows.each do |singleshow|
-        say "#{singleshow.gptitle}, #{singleshow.title}"
-      end 
-      response = ask "Which show would you like to watch?"
-	    if (response.match(/Cancel|Nevermind|None/))
-          say "Okay."
-        else		   
-          show = @plex_library.find_ondeck_show(response)
-          if(show != nil)
-            @plex_library.play_media(show.key)
-            say "Playing #{show.gptitle}, #{show.title}."
-          else
-            say "Sorry I couldn't find #{response} in the ondeck queue."
-          end 
-		end
-    else
-      say "Sorry I couldn't find anything in your onDeck queue."
-    end 
-    request_completed
-  end 
+	ondeck_shows = @plex_library.all_ondeck()
+	if(!ondeck_shows.empty?)
+	  say "On Deck shows are:"
+	  ondeck_shows.each do |singleshow|
+		say "#{singleshow.gptitle}, #{singleshow.title}"
+	  end
+		response = ask "Which show would you like to watch?"
+			if(response.match(/Cancel|Nevermind|None/))
+			  say "Okay."
+			else
+			  show = @plex_library.find_ondeck_show(response)
+				if(show != nil)
+					if(show.viewOffset != nil)
+					  resume = ask "Would you like to resume this episode or start from the beginning?"
+						resume.gsub!(/^The\s+/, "")
+						splitted = resume.split(" ").join("|")
+						if(splitted.match(/Resume/))
+						  @plex_library.resume_media(show.key, show.viewOffset.value)
+						  say "Resuming #{show.gptitle}, #{show.title}."
+						elsif(splitted.match(/Start|from|From|beginning|Beginning/))
+						  @plex_library.play_media(show.key)
+						  say "Playing #{show.gptitle}, #{show.title}."
+						else
+						  say "I'm sorry, I didn't understand that.  Please try again."
+						end
+					else
+					  @plex_library.play_media(show.key)
+					  say "Playing #{show.gptitle}, #{show.title}."
+					end
+				else
+				  say "Sorry I couldn't find #{response} in the ondeck queue."
+				end
+			end
+	else
+	  say "Sorry I couldn't find anything in your onDeck queue."
+	end
+	  request_completed
+  end
   
   listen_for /play(?: a)? random on deck (tv show|episode)/i do
-    ondeck_shows = @plex_library.all_ondeck()
-    if(!ondeck_shows.empty?)
-       show = @plex_library.all_ondeck.shuffle.first
-       if(show != nil)
-         @plex_library.play_media(show.key)
-         say "Playing #{show.gptitle}, #{show.title}."
-       else
-         say "Sorry, an error occurred.  Please try again."
-       end 
-    else
-      say "Sorry I couldn't find anything in your onDeck queue."
-    end 
-    request_completed
+	ondeck_shows = @plex_library.all_ondeck()
+	if(!ondeck_shows.empty?)
+	  show = @plex_library.all_ondeck.shuffle.first
+		if(show != nil)
+			if(show.viewOffset != nil)
+			  resume = ask "Would you like to resume this episode or start from the beginning?"
+			    resume.gsub!(/^The\s+/, "")
+				splitted = resume.split(" ").join("|")
+				if(splitted.match(/Resume/))
+				  @plex_library.resume_media(show.key, show.viewOffset.value)
+				  say "Resuming #{show.gptitle}, #{show.title}."
+				elsif(splitted.match(/Start|from|From|beginning|Beginning/))
+				  @plex_library.play_media(show.key)
+				  say "Playing #{show.gptitle}, #{show.title}."
+				else
+				  say "I'm sorry, I didn't understand that.  Please try again."
+				end
+			else
+			  @plex_library.play_media(show.key)
+			  say "Playing #{show.gptitle}, #{show.title}."
+			end
+		else
+		  say "Sorry, an error occurred.  Please try again."
+		end 
+	else
+	  say "Sorry I couldn't find anything in your onDeck queue."
+	end 
+	  request_completed
   end 
   
   listen_for /(play) (a)? random(.+) of(.+)/i do |command, misc, some, request|
-    show = @plex_library.find_show(request)
-    if(show != nil)
+	show = @plex_library.find_show(request)
+	if(show != nil)
 	  random_episode = @plex_library.show_episodes(show).shuffle.first
-	   if(random_episode != nil)
-         @plex_library.play_media(random_episode.key)
-		 say "Playing a random episode of #{show.title}."
-       else
-         say "Sorry, an error occurred.  Please try again."
-       end 
-    else
-      say "Sorry I couldn't find any TV shows."
-    end 
-    request_completed
+		if(random_episode != nil)
+		  @plex_library.play_media(random_episode.key)
+		  say "Playing a random episode of #{show.title}."
+		else
+		  say "Sorry, an error occurred.  Please try again."
+		end 
+	else
+	  say "Sorry I couldn't find any TV shows."
+	end 
+	  request_completed
   end 
   
-    listen_for /on deck movies/i do
-    ondeck_movies = @plex_library.all_ondeck_movies()
-    if(!ondeck_movies.empty?)
-      say "On Deck movies are:"
-      ondeck_movies.each do |singlemovie|
-        say "#{singlemovie.title}"
-      end 
-      response = ask "Which movie would you like to watch?"
-	    if (response.match(/Cancel|Nevermind|None/))
-          say "Okay."
-        else
-          movie = @plex_library.find_ondeck_movie(response)
-            if(movie != nil)
-              @plex_library.play_media(movie.key)
-              say "Playing #{movie.title}."
-            else
-              say "Sorry I couldn't find #{response} in the ondeck queue."
-            end 
-	    end
-    else
-      say "Sorry I couldn't find anything in your onDeck queue."
-    end 
-    request_completed
+  listen_for /on deck movies/i do
+	ondeck_movies = @plex_library.all_ondeck_movies()
+	if(!ondeck_movies.empty?)
+	  say "On Deck movies are:"
+	  ondeck_movies.each do |singlemovie|
+		say "#{singlemovie.title}"
+	  end
+		response = ask "Which movie would you like to watch?"
+		if (response.match(/Cancel|Nevermind|None/))
+		  say "Okay."
+		else
+		  movie = @plex_library.find_ondeck_movie(response)
+			if(movie != nil)
+				if(movie.viewOffset != nil)
+				  resume = ask "Would you like to resume #{movie.title} or start from the beginning?"
+				    resume.gsub!(/^The\s+/, "")
+					splitted = resume.split(" ").join("|")
+					if(splitted.match(/Resume/))
+					  @plex_library.resume_media(movie.key, movie.viewOffset.value)
+					  say "Resuming #{movie.title}."
+					elsif(splitted.match(/Start|from|From|beginning|Beginning/))
+					  @plex_library.play_media(movie.key)
+					  say "Playing #{movie.title}."
+					else
+					  say "I'm sorry, I didn't understand that.  Please try again."
+					end
+				else
+				  @plex_library.play_media(movie.key)
+				  say "Playing #{movie.title}."
+				end
+			else
+			  say "Sorry I couldn't find #{response} in the ondeck queue."
+			end
+		end
+	else
+	  say "Sorry I couldn't find anything in your onDeck queue."
+	end 
+	  request_completed
   end 
   
   listen_for /play(?: a)? random on deck movie/i do
-    ondeck_movies = @plex_library.all_ondeck_movies()
-    if(!ondeck_movies.empty?)
-       movie = @plex_library.all_ondeck_movies.shuffle.first
-       if(movie != nil)
-         @plex_library.play_media(movie.key)
-         say "Playing #{movie.title}."
-       else
-         say "Sorry, an error occurred.  Please try again."
-       end 
-    else
-      say "Sorry I couldn't find anything in your onDeck queue."
-    end 
-    request_completed
+	ondeck_movies = @plex_library.all_ondeck_movies()
+	if(!ondeck_movies.empty?)
+	  movie = @plex_library.all_ondeck_movies.shuffle.first
+		if(movie != nil)
+			if(movie.viewOffset != nil)
+			  resume = ask "Would you like to resume #{movie.title} or start from the beginning?"
+			    resume.gsub!(/^The\s+/, "")
+				splitted = resume.split(" ").join("|")
+				if(splitted.match(/Resume/))
+				  @plex_library.resume_media(movie.key, movie.viewOffset.value)
+				  say "Resuming #{movie.title}."
+				elsif(splitted.match(/Start|from|From|beginning|Beginning/))
+				  @plex_library.play_media(movie.key)
+				  say "Playing #{movie.title}."
+				else
+				  say "I'm sorry, I didn't understand that.  Please try again."
+				end
+			else
+			  @plex_library.play_media(movie.key)
+			  say "Playing #{movie.title}."
+			end
+		else
+		  say "Sorry, an error occurred.  Please try again."
+		end 
+	else
+	  say "Sorry I couldn't find anything in your onDeck queue."
+	end 
+	  request_completed
   end 
   
   listen_for /play(?: a)? random unwatched movie/i do
-    unwatched_movies = @plex_library.all_unwatched_movies()
-    if(!unwatched_movies.empty?)
-       movie = @plex_library.all_unwatched_movies.shuffle.first
-       if(movie != nil)
-         @plex_library.play_media(movie.key)
-         say "Playing #{movie.title}."
-       else
-         say "Sorry, an error occurred.  Please try again."
-       end 
-    else
-      say "Sorry I couldn't find any unwatched movies."
-    end 
-    request_completed
-  end 
+	unwatched_movies = @plex_library.all_unwatched_movies()
+	if(!unwatched_movies.empty?)
+	  movie = @plex_library.all_unwatched_movies.shuffle.first
+		if(movie != nil)
+		  @plex_library.play_media(movie.key)
+		  say "Playing #{movie.title}."
+		else
+		  say "Sorry, an error occurred.  Please try again."
+		end 
+	else
+	  say "Sorry I couldn't find any unwatched movies."
+	end 
+	  request_completed
+  end
   
   listen_for /(play) (the)? movie (.+)/i do |command, misc, next_movie|
-    movies = @plex_library.all_movies()
+	movies = @plex_library.all_movies()
 	if(!movies.empty?)
-      movie = @plex_library.find_movie(next_movie)
-	  if(movie != nil)
-	    @plex_library.play_media(movie.key)
-        say "Playing #{movie.title}."
-	  else
-	    say "Sorry I couldn't find #{next_movie}."
-	  end
+	  movie = @plex_library.find_movie(next_movie)
+		if(movie != nil)
+		  @plex_library.play_media(movie.key)
+		  say "Playing #{movie.title}."
+		else
+		  say "Sorry I couldn't find #{next_movie}."
+		end
 	else
 	  say "Sorry I couldn't find any movies."
 	end
-	request_completed
+	  request_completed
   end
   
   listen_for /play(?: a)? random movie/i do
-    all_movies = @plex_library.all_movies()
-    if(!all_movies.empty?)
-       movie = @plex_library.all_movies.shuffle.first
-       if(movie != nil)
-         @plex_library.play_media(movie.key)
-         say "Playing #{movie.title}."
-       else
-         say "Sorry, an error occurred.  Please try again."
-       end 
-    else
-      say "Sorry I couldn't find any movies."
-    end 
-    request_completed
+	all_movies = @plex_library.all_movies()
+	if(!all_movies.empty?)
+	  movie = @plex_library.all_movies.shuffle.first
+		if(movie != nil)
+		  @plex_library.play_media(movie.key)
+		  say "Playing #{movie.title}."
+		else
+		  say "Sorry, an error occurred.  Please try again."
+		end 
+	else
+	  say "Sorry I couldn't find any movies."
+	end 
+	  request_completed
   end 
   
-  listen_for /(play) (the)? next(.+) of (.+)/i do |command, misc, some, next_episode|
-    ondeck_shows = @plex_library.all_ondeck()
-    if(!ondeck_shows.empty?)
-       show = @plex_library.find_ondeck_show(next_episode)
-       if(show != nil)
-         @plex_library.play_media(show.key)
-         say "Playing #{show.gptitle}, #{show.title}."
-       else
-         say "Sorry I couldn't find #{next_episode} in the ondeck queue."
-       end 
-    else
-      say "Sorry I couldn't find anything in your onDeck queue."
-    end 
-    request_completed
+  listen_for /(play)(?: the)? next(.+) of (.+)/i do |command, some, next_episode|
+	ondeck_shows = @plex_library.all_ondeck()
+	if(!ondeck_shows.empty?)
+	  show = @plex_library.find_ondeck_show(next_episode)
+		if(show != nil)
+			if(show.viewOffset != nil)
+			  resume = ask "Would you like to resume this episode or start from the beginning?"
+			    resume.gsub!(/^The\s+/, "")
+				splitted = resume.split(" ").join("|")
+				if(splitted.match(/Resume/))
+				  @plex_library.resume_media(show.key, show.viewOffset.value)
+				  say "Resuming #{show.gptitle}, #{show.title}."
+				elsif(splitted.match(/Start|from|From|beginning|Beginning/))
+				  @plex_library.play_media(show.key)
+				  say "Playing #{show.gptitle}, #{show.title}."
+				else
+				  say "I'm sorry, I didn't understand that.  Please try again."
+				end
+			else
+			  @plex_library.play_media(show.key)
+			  say "Playing #{show.gptitle}, #{show.title}."
+			end
+		else
+		  say "Sorry I couldn't find #{next_episode} in the ondeck queue."
+		end 
+	else
+	  say "Sorry I couldn't find anything in your onDeck queue."
+	end 
+	  request_completed
   end 
   
   listen_for /(play|playing) (the)? latest(.+) of(.+)/i do |command, misc, some, show|
-    play_latest_episode_of(show)
-    request_completed
+	play_latest_episode_of(show)
+	request_completed
   end
   
-  listen_for /(play|playing) (the)? (tv)? show(.+) (.+)/i do |command, misc, some, show_title|
+  listen_for /(play|playing)(?: the)?(?: TV)? show (.+)/i do |command, show_title|
 
     season_index = 1
     show = @plex_library.find_show(show_title)
@@ -261,8 +336,8 @@ class SiriProxy::Plugin::Plex < SiriProxy::Plugin
   end
   
   listen_for /(Pause|Resume|Stop)(?: the)? (plex|tv|show|tv show|movie)/i do |command, some|
-    if command == "Pause"
-      @plex_library.pause
+	if command == "Pause"
+	  @plex_library.pause
 	  say "Pausing #{some}"
 	elsif command == "Resume"
 	  @plex_library.resume_play
@@ -271,7 +346,7 @@ class SiriProxy::Plugin::Plex < SiriProxy::Plugin
 	  @plex_library.stop
 	  say "Stopping #{some}"
 	end	
-	request_completed
+	  request_completed
   end
   
   def ask_for_number(question)   
