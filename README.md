@@ -30,11 +30,11 @@ Installation
 
 1. Add the following, using your IP, Port and Index to your ~siriproxy/config.yml file    
 		\- name: 'Plex'    
-		   git: 'git://github.com/hjaltij/SiriProxy-Plex.git'    
+		   git: 'git://github.com/whoismezero/SiriProxy-Plex.git'    
 		   plex_host: '0.0.0.0' #Internal IP address of your Plex Media Server.    
 		   plex_port: '32400' #Most likely you won't have to change this, it runs on port 32400 by default.    
 		   plex_tv_index: '2' #This is the path to your TV index within PMS, set to 'auto' for autodetect.        
-           plex_movie_index: '1' #This is the path to your Movie index within PMS, set to 'auto' for autodetect.
+		   plex_movie_index: '1' #This is the path to your Movie index within PMS, set to 'auto' for autodetect.
 
 		   
 2. Run bundler from your siriproxy root directory
@@ -56,14 +56,3 @@ FAQ
 	* View page source
 	* Find the key for title of your your TV index
 		Directory refreshing="0"  **key="1"** type="show" title="TV" art="/:/resources/show-fanart.jpg" agent="com.plexapp.agents.thetvdb"
-
-Recent Updates
---------------
-**8-Dec-2011**
-+       Added this README.md with "Voice Commands" section to help identify conflicts with other plugins.
-+       Added message "Couldn't find anything in on deck queue" when onDeck is empty
-
-
-**9-Dec-2011**
-+       Added support for multiple TV sections: set by using 'auto' for plex_tv_index in config.yml
-
