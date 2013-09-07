@@ -33,6 +33,7 @@ Installation
 		   git: 'git://github.com/whoismezero/SiriProxy-Plex.git'    
 		   plex_host: '0.0.0.0' #Internal IP address of your Plex Media Server.    
 		   plex_port: '32400' #Most likely you won't have to change this, it runs on port 32400 by default.    
+		   plex_client: '10.0.1.77' #Internal IP address of your Plex Player.
 		   plex_tv_index: '2' #This is the path to your TV index within PMS, set to 'auto' for autodetect.        
 		   plex_movie_index: '1' #This is the path to your Movie index within PMS, set to 'auto' for autodetect.
 

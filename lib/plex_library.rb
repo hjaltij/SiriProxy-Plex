@@ -9,12 +9,12 @@ MOVIES = "com.plexapp.agents.imdb"
 
 
 class PlexLibrary
-  def initialize(host, port, tv_index, movie_index, player = nil)
+  def initialize(host, port, tv_index, movie_index, player)
     @host     = host
     @port     = port
     @tv_index = tv_index
     @movie_index = movie_index
-    @player   = player.nil? ? host : player
+    @player   = player
     @indexes = {}
     @indexes["#{TV}"] = []
     if (tv_index == "auto")
