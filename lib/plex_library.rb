@@ -9,12 +9,11 @@ MOVIES = "com.plexapp.agents.imdb"
 
 
 class PlexLibrary
-  def initialize(host, port, tv_index, movie_index, player)
+  def initialize(host, port, tv_index, movie_index)
     @host     = host
     @port     = port
     @tv_index = tv_index
     @movie_index = movie_index
-    @player   = player
     @indexes = {}
     @indexes["#{TV}"] = []
     if (tv_index == "auto")
@@ -242,57 +241,5 @@ class PlexLibrary
     movies = movies.detect {|s| s.title.match(/#{splitted}/i)}
     return movies
   end
-  
-  def play_media(key)
-    url_encoded_key = CGI::escape(key)
-    uri = "http://#{@host}:#{@port}/system/players/#{@player}/application/playMedia?key=#{url_encoded_key}&path=http://#{@host}:#{@port}#{key}"
-    
-    begin
-      open(uri).read
-    rescue OpenURI::HTTPError => err
-      puts "Cannot start playback on #{@player} - are you sure the Plex Player is running (#{err}) -> #{uri}"
-    end
-  end
-  
-  def resume_media(key, viewOffset)
-    url_encoded_key = CGI::escape(key)
-    uri = "http://#{@host}:#{@port}/system/players/#{@player}/application/playMedia?key=#{url_encoded_key}&path=http://#{@host}:#{@port}#{key}&viewOffset=#{viewOffset}"
-    
-    begin
-      open(uri).read
-    rescue OpenURI::HTTPError => err
-      puts "Cannot start playback on #{@player} - are you sure the Plex Player is running (#{err}) -> #{uri}"
-    end
-  end
-  
-  def pause
-    uri = "http://#{@host}:#{@port}/system/players/#{@player}/playback/pause"
-	
-    begin
-      open(uri).read
-    rescue OpenURI::HTTPError => err
-      puts "Cannot pause playback on #{@player} - are you sure the Plex Player is running (#{err}) -> #{uri}"
-    end
-  end
-  
-  def resume_play
-    uri = "http://#{@host}:#{@port}/system/players/#{@player}/playback/play"
 
-    begin
-      open(uri).read
-    rescue OpenURI::HTTPError => err
-      puts "Cannot resume playback on #{@player} - are you sure the Plex Player is running (#{err}) -> #{uri}"
-    end
-  end
-  
-  def stop
-    uri = "http://#{@host}:#{@port}/system/players/#{@player}/playback/stop"
-	
-    begin
-      open(uri).read
-    rescue OpenURI::HTTPError => err
-      puts "Cannot stop playback on #{@player} - are you sure the Plex Player is running (#{err}) -> #{uri}"
-    end
-  end
-  
 end
