@@ -15,17 +15,14 @@ Voice Commands
 + on deck tv shows
 + play a random on deck tv show
 + play a random episode of "show"
-
 + play the movie "movie"
 + on deck movies
 + play a random on deck movie
 + play a random unwatched movie
 + play a random movie
-
 + pause movie/tv/show/plex
 + resume movie/tv/show/plex
 + stop movie/tv/show/plex
-
 + Add new Plex player
 + Switch current Plex player to "player"
 
