@@ -9,11 +9,11 @@ MOVIES = "com.plexapp.agents.imdb"
 
 
 class PlexLibrary
-  def initialize(host, port, tv_index, player = nil)
+  def initialize(host, port, tv_index, movie_index)
     @host     = host
     @port     = port
-#    @tv_index = tv_index
-    @player   = player.nil? ? host : player
+    @tv_index = tv_index
+    @movie_index = movie_index
     @indexes = {}
     @indexes["#{TV}"] = []
     if (tv_index == "auto")
@@ -29,6 +29,21 @@ class PlexLibrary
     else
        @indexes["#{TV}"] << "#{tv_index}"
     end
+	@indexes["#{MOVIES}"] = []
+	if (movie_index == "auto")
+       doc = xml_doc_for_path("/library/sections")
+       doc.elements.each('MediaContainer/Directory') do |ele|
+          num = ele.attribute("key").value
+          agent = ele.attribute("agent").value
+          if (!@indexes.include?("#{agent}"))
+             @indexes["#{agent}"] = []
+          end
+             @indexes["#{agent}"] << "#{num}"
+       end
+    else
+       @indexes["#{MOVIES}"] << "#{movie_index}"
+    end
+	
   end
   
   def base_path
@@ -61,7 +76,7 @@ class PlexLibrary
        doc = xml_doc_for_path("/library/sections/#{tvindex}/onDeck")
 
        doc.elements.each('MediaContainer/Video') do |ele|
-         ondeck_shows << PlexOndeck.new(ele.attribute("key").value, ele.attribute("title").value, ele.attribute("grandparentTitle").value)
+         ondeck_shows << PlexOndeck.new(ele.attribute("key").value, ele.attribute("title").value, ele.attribute("grandparentTitle").value, ele.attribute("viewOffset"))
        end
     end
     return ondeck_shows
@@ -167,16 +182,64 @@ class PlexLibrary
     if show == nil then return nil end
     show_episodes(show).sort.last
   end
-  
-  def play_media(key)
-    url_encoded_key = CGI::escape(key)
-    uri = "http://#{@host}:#{@port}/system/players/#{@player}/application/playMedia?key=#{url_encoded_key}&path=http://#{@host}:#{@port}#{key}"
     
-    begin
-      open(uri).read
-    rescue OpenURI::HTTPError => err
-      puts "Cannot start playback on #{@player} - are you sure the Plex Player is running (#{err}) -> #{uri}"
+  def all_movies
+    movies = []
+	@indexes[MOVIES].each do |movieindex|
+       doc = xml_doc_for_path("/library/sections/#{movieindex}/all")
+
+       doc.elements.each('MediaContainer/Video') do |ele|
+         movies << PlexShow.new(ele.attribute("key").value, ele.attribute("title").value)
+       end
     end
+    return movies
   end
   
+  def find_movie(title)
+    title.gsub!(/^The\s+/, "")
+    splitted = title.split(" ").join("|") 
+    movies = all_movies    
+    movies.detect {|s| s.title.match(/#{splitted}/i)}
+  end
+
+  def all_ondeck_movies
+    ondeck_movies = []
+	@indexes[MOVIES].each do |movieindex|
+       doc = xml_doc_for_path("/library/sections/#{movieindex}/onDeck")
+
+       doc.elements.each('MediaContainer/Video') do |ele|
+         ondeck_movies << PlexOndeck.new(ele.attribute("key").value, ele.attribute("title").value, ele.attribute("grandparentTitle"), ele.attribute("viewOffset"))
+       end
+    end
+    return ondeck_movies
+  end
+  
+  def find_ondeck_movie(title)
+    title.gsub!(/^The\s+/, "")
+    splitted = title.split(" ").join("|")
+    movies = all_ondeck_movies
+    movies = movies.detect {|s| s.title.match(/#{splitted}/i)}
+    return movies
+  end
+  
+    def all_unwatched_movies
+    unwatched_movies = []
+	@indexes[MOVIES].each do |movieindex|
+       doc = xml_doc_for_path("/library/sections/#{movieindex}/unwatched")
+
+       doc.elements.each('MediaContainer/Video') do |ele|
+         unwatched_movies << PlexShow.new(ele.attribute("key").value, ele.attribute("title").value)
+       end
+    end
+    return unwatched_movies
+  end
+  
+  def find_unwatched_movie(title)
+    title.gsub!(/^The\s+/, "")
+    splitted = title.split(" ").join("|")
+    movies = all_unwatched_movies
+    movies = movies.detect {|s| s.title.match(/#{splitted}/i)}
+    return movies
+  end
+
 end
